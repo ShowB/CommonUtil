@@ -1,12 +1,17 @@
 package com.snet.smore.common.util;
 
+import com.snet.smore.common.constant.Constant;
+import com.snet.smore.common.constant.FileStatusPrefix;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class FileUtil {
@@ -235,5 +240,42 @@ public class FileUtil {
         }
 
         log.debug("**************** File Merge Finished !!!");
+    }
+
+    public static Path changeFileStatus(Path originPath, FileStatusPrefix prefix) throws IOException {
+        String fileName = originPath.getFileName().toString();
+
+        for (FileStatusPrefix f : FileStatusPrefix.values()) {
+            if (fileName.startsWith(f.getPrefix()))
+                fileName = fileName.replace(f.getPrefix(), "");
+        }
+
+        fileName = prefix.getPrefix() + fileName;
+
+        Path changePath = Paths.get(originPath.getParent().toAbsolutePath().toString(), fileName);
+        return Files.move(originPath, changePath);
+    }
+
+    public static List<Path> findFiles(Path root, String glob) {
+        List<Path> files = new ArrayList<>();
+
+        if (StringUtil.isBlank(glob))
+            glob = "*.*";
+
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+
+        try (Stream<Path> pathStream = Files.find(root, Integer.MAX_VALUE,
+                (p, a) -> matcher.matches(p.getFileName())
+                        && !p.getFileName().toString().startsWith(FileStatusPrefix.COMPLETE.getPrefix())
+                        && !p.getFileName().toString().startsWith(FileStatusPrefix.ERROR.getPrefix())
+                        && !p.getFileName().toString().startsWith(FileStatusPrefix.TEMP.getPrefix())
+                        && !a.isDirectory()
+                        && a.isRegularFile())) {
+            files = pathStream.collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("An error occurred while finding source files.", e);
+        }
+
+        return files;
     }
 }

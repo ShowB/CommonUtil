@@ -1,5 +1,6 @@
 package com.snet.smore.common.util;
 
+import com.snet.smore.common.constant.Constant;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
@@ -59,6 +60,11 @@ public class Environment {
 
     public Properties getProperties() {
         return this.properties;
+    }
+
+    protected void reload() {
+        properties = null;
+        loadProperty();
     }
 
 }

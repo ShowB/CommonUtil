@@ -24,4 +24,8 @@ public class EnvManager {
     public static String getProperty(String key) {
         return getEnvironment().getProperty(key);
     }
+
+    public static void reload() {
+        getEnvironment().reload();
+    }
 }

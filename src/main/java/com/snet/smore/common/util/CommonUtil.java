@@ -1,5 +1,6 @@
 package com.snet.smore.common.util;
 
+import com.snet.smore.common.constant.Constant;
 import lombok.extern.slf4j.Slf4j;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;

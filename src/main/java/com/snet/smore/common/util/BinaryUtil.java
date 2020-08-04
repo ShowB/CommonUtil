@@ -4,31 +4,35 @@ public class BinaryUtil {
     /**
      * 2진수값을 10진수로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param row row
      * @param col col
      * @return int
      */
-    public static int oneBinaryToDecimal(byte[] bytes, int row, int col) {
+    public static int bitToDecimal(byte[] rbff, int row, int col) {
         String binary = "";
-        binary = byteArrayToBin(bytes[row], col) + binary;
+        binary = byteArrayToBin(rbff[row], col) + binary;
 
         return Integer.parseInt(binary, 2); // 10진수값 변경
+    }
+
+    public static char bitToChar(byte[] rbff, int row, int col) {
+        return byteArrayToBin(rbff[row], col) == 0 ? '0' : '1';
     }
 
     /**
      * 특정영역의 2진수값을 10진수로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param row row
      * @param startCol startCol
      * @param endCol endCol
      * @return int
      */
-    public static int binaryToDecimal(byte[] bytes, int row, int startCol, int endCol) {
+    public static int bitsToDecimal(byte[] rbff, int row, int startCol, int endCol) {
         StringBuilder binary = new StringBuilder();
         for (int i = startCol; i <= endCol; i++) {
-            binary.insert(0, byteArrayToBin(bytes[row], i));
+            binary.insert(0, byteArrayToBin(rbff[row], i));
         }
         return Integer.parseInt(binary.toString(), 2); // 10진수값 변경
     }
@@ -36,16 +40,73 @@ public class BinaryUtil {
     /**
      * 멀티Row의 2진수값을 10진수로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param startRow startRow
      * @param endRow endRow
      * @return int
      */
-    public static int multiByteToDecimal(byte[] bytes, int startRow, int endRow) {
+    public static int bytesToDecimal(byte[] rbff, int startRow, int endRow) {
         StringBuilder binary = new StringBuilder();
-        for (int i = startRow; i <= endRow; i++) {
-            for (int j = 0; j <= 7; j++) {
-                binary.insert(0, byteArrayToBin(bytes[i], j));
+
+        // Byte 순서가 역순인 경우도 있음. (ex: 15, 14, 13 ... 0 인 형태의 2 Bytes 구조)
+        if (startRow > endRow) {
+            for (int i = startRow; i >= endRow; i--) {
+                for (int j = 0; j <= 7; j++) {
+                    binary.insert(0, byteArrayToBin(rbff[i], j));
+                }
+            }
+        } else {
+            for (int i = startRow; i <= endRow; i++) {
+                for (int j = 0; j <= 7; j++) {
+                    binary.insert(0, byteArrayToBin(rbff[i], j));
+                }
+            }
+        }
+//        int decimal = Integer.parseInt(binary, 2); // 10진수값 변경
+        // COMUtil.debug("multiByteToDecimal binary ::::::::::" + binary);
+        // COMUtil.debug("multiByteToDecimal decimal ::::::::::" + decimal);
+        return Integer.parseInt(binary.toString(), 2); // 10진수값 변경
+    }
+
+    public static int bytesAndBitsToDecimal(byte[] rbff, int startRow, int startCol, int endRow, int endCol) {
+        StringBuilder binary = new StringBuilder();
+
+        // Byte 순서가 역순인 경우도 있음. (ex: 15, 14, 13 ... 0 인 형태의 2 Bytes 구조)
+        if (startRow > endRow) {
+            for (int i = startRow; i >= endRow; i--) {
+                if (i == startRow) {
+                    for (int j = startCol; j <= 7; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                } else if (i == endRow) {
+                    for (int j = 0; j <= endCol; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                } else {
+                    for (int j = 0; j <= 7; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                }
+            }
+        } else {
+            for (int i = startRow; i <= endRow; i++) {
+                if (startRow == endRow) {
+                    for (int j = startCol; j <= endCol; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                } else if (i == startRow) {
+                    for (int j = startCol; j <= 7; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                } else if (i == endRow) {
+                    for (int j = 0; j <= endCol; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                } else {
+                    for (int j = 0; j <= 7; j++) {
+                        binary.insert(0, byteArrayToBin(rbff[i], j));
+                    }
+                }
             }
         }
 //        int decimal = Integer.parseInt(binary, 2); // 10진수값 변경
@@ -57,16 +118,16 @@ public class BinaryUtil {
     /**
      * 멀티Row의 2진수값을 10진수로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param startRow startRow
      * @param endRow endRow
      * @return Long
      */
-    public static long multiByteToDecimalLong(byte[] bytes, int startRow, int endRow) {
+    public static Long bytesToDecimalLong(byte[] rbff, int startRow, int endRow) {
         StringBuilder binary = new StringBuilder();
         for (int i = startRow; i <= endRow; i++) {
             for (int j = 0; j <= 7; j++) {
-                binary.insert(0, byteArrayToBin(bytes[i], j));
+                binary.insert(0, byteArrayToBin(rbff[i], j));
             }
         }
 //        Long decimal = Long.parseLong(binary, 2); // 10진수값 변경
@@ -83,17 +144,17 @@ public class BinaryUtil {
     /**
      * 2바이트 Binary의 2의 보수 역산(음수 처리)
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param startRow
      * @return
      */
-    public static long revert2Complement(byte[] bytes, int startRow, int endRow) {
+    public static Long revert2Complement(byte[] rbff, int startRow, int endRow) {
         long result;
         StringBuilder binary = new StringBuilder();
 
         for (int i = startRow; i <= endRow; i++) {
             for (int j = 0; j <= 7; j++) {
-                binary.insert(0, byteArrayToBin(bytes[i], j));
+                binary.insert(0, byteArrayToBin(rbff[i], j));
             }
         }
 
@@ -142,16 +203,16 @@ public class BinaryUtil {
     /**
      * 특정영역의 2진수값을 Hexadecimal로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param row row
      * @param startCol startCol
      * @param endCol endCol
      * @return String
      */
-    public static String binaryToHex(byte[] bytes, int row, int startCol, int endCol) {
+    public static String bitsToHex(byte[] rbff, int row, int startCol, int endCol) {
         StringBuilder binary = new StringBuilder();
         for (int i = startCol; i <= endCol; i++) {
-            binary.insert(0, byteArrayToBin(bytes[row], i));
+            binary.insert(0, byteArrayToBin(rbff[row], i));
         }
 //        String hexa = Long.toHexString(Long.parseLong(binary, 2)); // HEX 변경
         // COMUtil.debug("binaryToDecimal binary :::::::: " + binary);
@@ -162,16 +223,16 @@ public class BinaryUtil {
     /**
      * 멀티Row의 2진수값을 Hexadecimal로 변경
      *
-     * @param bytes bytes
+     * @param rbff rbff
      * @param startRow startRow
      * @param endRow endRow
      * @return String
      */
-    public static String multiByteToHex(byte[] bytes, int startRow, int endRow) {
+    public static String bytesToHex(byte[] rbff, int startRow, int endRow) {
         StringBuilder binary = new StringBuilder();
         for (int i = startRow; i <= endRow; i++) {
             for (int j = 0; j <= 7; j++) {
-                binary.insert(0, byteArrayToBin(bytes[i], j));
+                binary.insert(0, byteArrayToBin(rbff[i], j));
             }
         }
 //        String hexa = Long.toHexString(Long.parseLong(binary, 2)); // HEX 변경

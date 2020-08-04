@@ -1,5 +1,6 @@
 package com.snet.smore.common.util;
 
+import com.snet.smore.common.constant.Constant;
 import org.junit.Test;
 
 import java.io.File;
