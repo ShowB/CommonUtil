@@ -11,4 +11,13 @@ public class StringUtilTest {
 
         Assert.assertEquals(camelCase, "scottTigerAndYou2A");
     }
+
+    @Test
+    public void test2() {
+        String aa = "aabcdeaffaaa";
+
+        aa = aa.replaceFirst("a", "");
+
+        System.out.println(aa);
+    }
 }

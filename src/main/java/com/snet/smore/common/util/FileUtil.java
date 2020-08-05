@@ -278,4 +278,32 @@ public class FileUtil {
 
         return files;
     }
+
+    public static void initFiles(Path root) {
+        List<Path> list = new ArrayList<>();
+
+        FileStatusPrefix[] values = FileStatusPrefix.values();
+        for (FileStatusPrefix prefix : values) {
+            try (Stream<Path> temp = Files.find(root, Integer.MAX_VALUE, (p, a)
+                    -> p.getFileName().toString().startsWith(prefix.getPrefix())
+                    && !a.isDirectory())) {
+                list = temp.collect(Collectors.toList());
+            } catch (Exception e) {
+                log.error("An error occurred while initializing files.", e);
+            }
+
+            int total = list.size();
+            int curr = 0;
+
+            for (Path p : list) {
+                try {
+                    System.out.println("[" + (++curr) + " / " + total + "]" + "\t" + p);
+                    Files.move(p, Paths.get(p.getParent().toAbsolutePath().toString()
+                            , p.getFileName().toString().replace(prefix.getPrefix(), "")));
+                } catch (IOException e) {
+                    log.error("An error occurred while initializing files. {}", p, e);
+                }
+            }
+        }
+    }
 }
