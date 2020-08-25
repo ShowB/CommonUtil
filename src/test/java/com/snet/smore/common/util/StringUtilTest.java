@@ -20,4 +20,10 @@ public class StringUtilTest {
 
         System.out.println(aa);
     }
+
+    @Test
+    public void encrypt() {
+        System.out.println(CommonUtil.getDecrypt("c21hcnQ="));
+        System.out.println(CommonUtil.getDecrypt("c21hcnQxMjMkJV4="));
+    }
 }

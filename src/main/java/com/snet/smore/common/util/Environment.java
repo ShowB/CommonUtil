@@ -3,7 +3,6 @@ package com.snet.smore.common.util;
 import com.snet.smore.common.constant.Constant;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
@@ -25,10 +24,6 @@ public class Environment {
      * 환경정보 파일을 읽는다.
      */
     public void loadProperty() {
-        if (properties != null) {
-            return;
-        }
-
         String uri = Constant.WORK_DIR + Constant.FILE_SEPARATOR + "config" + Constant.FILE_SEPARATOR + "environment.properties";
         properties = new Properties();
 
@@ -36,15 +31,7 @@ public class Environment {
              InputStream inputStream = Channels.newInputStream(channel)) {
             properties.load(inputStream);
         } catch (IOException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
-            loadProperty();
-        }
-
-        try (FileInputStream fis = new FileInputStream(uri)) {
-            properties.load(fis);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("An error occurred while setting environment.properties.", e);
             loadProperty();
         }
     }
@@ -60,11 +47,6 @@ public class Environment {
 
     public Properties getProperties() {
         return this.properties;
-    }
-
-    protected void reload() {
-        properties = null;
-        loadProperty();
     }
 
 }

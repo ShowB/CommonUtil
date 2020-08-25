@@ -250,10 +250,11 @@ public class FileUtil {
                 fileName = fileName.replace(f.getPrefix(), "");
         }
 
-        fileName = prefix.getPrefix() + fileName;
+        if (prefix != null)
+            fileName = prefix.getPrefix() + fileName;
 
         Path changePath = Paths.get(originPath.getParent().toAbsolutePath().toString(), fileName);
-        return Files.move(originPath, changePath);
+        return Files.move(originPath, changePath, StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static List<Path> findFiles(Path root, String glob) {
@@ -280,30 +281,28 @@ public class FileUtil {
     }
 
     public static void initFiles(Path root) {
-        List<Path> list = new ArrayList<>();
+        List<Path> list;
 
         FileStatusPrefix[] values = FileStatusPrefix.values();
-        for (FileStatusPrefix prefix : values) {
-            try (Stream<Path> temp = Files.find(root, Integer.MAX_VALUE, (p, a)
-                    -> p.getFileName().toString().startsWith(prefix.getPrefix())
-                    && !a.isDirectory())) {
-                list = temp.collect(Collectors.toList());
-            } catch (Exception e) {
-                log.error("An error occurred while initializing files.", e);
-            }
+        int curr = 0;
+        try (Stream<Path> temp = Files.find(root, Integer.MAX_VALUE, (p, a)
+                -> !a.isDirectory())) {
 
-            int total = list.size();
-            int curr = 0;
+            list = temp.collect(Collectors.toList());
 
             for (Path p : list) {
-                try {
-                    System.out.println("[" + (++curr) + " / " + total + "]" + "\t" + p);
-                    Files.move(p, Paths.get(p.getParent().toAbsolutePath().toString()
-                            , p.getFileName().toString().replace(prefix.getPrefix(), "")));
-                } catch (IOException e) {
-                    log.error("An error occurred while initializing files. {}", p, e);
+                for (FileStatusPrefix prefix : values) {
+                    if (p.getFileName().toString().startsWith(prefix.getPrefix())) {
+                        Files.move(p, Paths.get(p.getParent().toAbsolutePath().toString()
+                                , p.getFileName().toString().replace(prefix.getPrefix(), "")));
+                        curr++;
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("An error occurred while initializing files.", e);
         }
+
+        log.info("{} Files initialization was successfully completed.", curr);
     }
 }
