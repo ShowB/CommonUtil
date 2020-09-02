@@ -45,6 +45,14 @@ public class EnvManager {
         }
     }
 
+    public static char getProperty(String propertyName, char defaultValue) {
+        try {
+            return EnvManager.getProperty(propertyName).toCharArray()[0];
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public static void reload() {
         LazyHolder.reload();
     }

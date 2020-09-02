@@ -8,6 +8,17 @@ public class DbInfo {
     String url;
     String username;
     String password;
+    String className;
+
+    public DbInfo(String url, String username, String password, String className) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.className = className;
+    }
+
+    public DbInfo() {
+    }
 
     public void setUsernameWithEncrypt(String username) {
         this.username = CommonUtil.getEncrypt(username);

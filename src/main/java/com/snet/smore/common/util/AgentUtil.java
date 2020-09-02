@@ -18,37 +18,42 @@ public class AgentUtil {
         dbInfo.setUsername(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.username"));
         dbInfo.setPassword(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.password"));
         dbInfo.setUrl(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.url"));
+        dbInfo.setClassName(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.classname"));
 
-        Connection conn = DbUtil.getConnection(dbInfo);
+        Connection conn;
+        synchronized (conn = DbUtil.getConnection(dbInfo)) {
 
-        String query = "SELECT AGENT_TYPE" +
-                "            , AGENT_NM" +
-                "            , USE_YN" +
-                "            , CHANGE_YN" +
-                "            , CONFIG_DS" +
-                "            , CREATE_DT" +
-                "            , UPDATE_DT" +
-                "         FROM SMORE_AGENT" +
-                "        WHERE AGENT_TYPE = ?" +
-                "          AND AGENT_NM = ?";
+            String query = "SELECT AGENT_TYPE" +
+                    "            , AGENT_NM" +
+                    "            , USE_YN" +
+                    "            , CHANGE_YN" +
+                    "            , CONFIG_DS" +
+                    "            , CREATE_DT" +
+                    "            , UPDATE_DT" +
+                    "         FROM SMORE_AGENT" +
+                    "        WHERE AGENT_TYPE = ?" +
+                    "          AND AGENT_NM = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, agentType);
-            pstmt.setString(2, agentName);
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, agentType);
+                pstmt.setString(2, agentName);
 
-            ResultSet rs = pstmt.executeQuery();
+                ResultSet rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                agent.setAgentType(rs.getString(1));
-                agent.setAgentNm(rs.getString(2));
-                agent.setUseYn(rs.getString(3));
-                agent.setChangeYn(rs.getString(4));
-                agent.setConfigDs(rs.getString(5));
-                agent.setCreateDt(rs.getDate(6));
-                agent.setUpdateDt(rs.getDate(7));
+                while (rs.next()) {
+                    agent.setAgentType(rs.getString(1));
+                    agent.setAgentNm(rs.getString(2));
+                    agent.setUseYn(rs.getString(3));
+                    agent.setChangeYn(rs.getString(4));
+                    agent.setConfigDs(rs.getString(5));
+                    agent.setCreateDt(rs.getDate(6));
+                    agent.setUpdateDt(rs.getDate(7));
+                }
+
+                conn.commit();
+            } catch (Exception e) {
+                log.error("An error occurred while getting agent info. [{}:{}]", agentType, agentName, e);
             }
-        } catch (Exception e) {
-            log.error("An error occurred while getting agent info. [{}:{}]", agentType, agentName, e);
         }
 
         return agent;
@@ -61,26 +66,37 @@ public class AgentUtil {
         dbInfo.setPassword(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.password"));
         dbInfo.setUrl(EnvManager.getProperty(agentType.toLowerCase() + ".framework.db.url"));
 
-        Connection conn = DbUtil.getConnection(dbInfo);
+        Connection conn;
+        synchronized (conn = DbUtil.getConnection(dbInfo)) {
 
-        String query = "UPDATE SMORE_AGENT" +
-                "          SET CHANGE_YN = ?" +
-                "            , UPDATE_DT = CURRENT_TIMESTAMP" +
-                "        WHERE AGENT_TYPE = ?" +
-                "          AND AGENT_NM = ?";
+            String query = "UPDATE SMORE_AGENT" +
+                    "          SET CHANGE_YN = ?" +
+                    "            , UPDATE_DT = CURRENT_TIMESTAMP" +
+                    "        WHERE AGENT_TYPE = ?" +
+                    "          AND AGENT_NM = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, yn);
-            pstmt.setString(2, agentType);
-            pstmt.setString(3, agentName);
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, yn);
+                pstmt.setString(2, agentType);
+                pstmt.setString(3, agentName);
 
-            int result = pstmt.executeUpdate();
+                int result = pstmt.executeUpdate();
 
-            if (result > 0)
-                log.info("Update [CHANGE_YN] value was successfully completed. [{}:{}], [{}]", agentType, agentName, yn);
+                conn.commit();
 
-        } catch (Exception e) {
-            log.error("An error occurred while updating [CHANGE_YN]. [{}:{}]", agentType, agentName, e);
+                if (result > 0)
+                    log.info("Update [CHANGE_YN] value was successfully completed. [{}:{}], [{}]", agentType, agentName, yn);
+
+            } catch (Exception e) {
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    log.error("An error occurred while rolling back transaction.", ex);
+                }
+
+                log.error("An error occurred while updating [CHANGE_YN]. [{}:{}]", agentType, agentName, e);
+            }
+
         }
     }
 }

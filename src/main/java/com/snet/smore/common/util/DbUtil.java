@@ -25,8 +25,13 @@ public class DbUtil {
             String user = info.getDecryptedUsername();
             String password = info.getDecryptedPassword();
 
+            if (StringUtil.isNotBlank(info.getClassName())) {
+                Class.forName(info.getClassName());
+            }
+
             conn = DriverManager.getConnection(url, user, password);
-        } catch (SQLException e) {
+            conn.setAutoCommit(false);
+        } catch (Exception e) {
             log.error("An error occurred while getting database connection.", e);
         }
 
