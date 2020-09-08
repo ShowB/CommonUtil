@@ -274,7 +274,7 @@ public class FileUtil {
                         && a.isRegularFile())) {
             files = pathStream.collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("An error occurred while finding source files.", e);
+            log.error("An error occurred while finding source files: {}", e.getMessage());
         }
 
         return files;

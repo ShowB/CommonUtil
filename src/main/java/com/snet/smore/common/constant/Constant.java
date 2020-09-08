@@ -22,4 +22,6 @@ public class Constant {
 
     public final static String YN_Y = "Y";
     public final static String YN_N = "N";
+
+    public final static String COMMON_COLUMN_SMORE_TABLE_NM = "smore_table_nm";
 }
