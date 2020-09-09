@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 
 @Slf4j
 public class AgentUtil {
-    public static Agent getAgent(String agentType, String agentName) {
+    public static Agent getAgent(String agentType, String agentName) throws Exception {
         Agent agent = new Agent();
 
         DbInfo dbInfo = new DbInfo();
