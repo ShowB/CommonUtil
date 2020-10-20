@@ -23,7 +23,7 @@ public class StringUtilTest {
 
     @Test
     public void encrypt() {
-        System.out.println(CommonUtil.getDecrypt("c21hcnQ="));
-        System.out.println(CommonUtil.getDecrypt("c21hcnQxMjMkJV4="));
+        System.out.println(EncryptUtil.getDecrypt("c21hcnQ="));
+        System.out.println(EncryptUtil.getDecrypt("c21hcnQxMjMkJV4="));
     }
 }

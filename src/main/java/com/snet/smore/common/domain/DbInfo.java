@@ -1,6 +1,6 @@
 package com.snet.smore.common.domain;
 
-import com.snet.smore.common.util.CommonUtil;
+import com.snet.smore.common.util.EncryptUtil;
 import lombok.Data;
 
 @Data
@@ -21,18 +21,18 @@ public class DbInfo {
     }
 
     public void setUsernameWithEncrypt(String username) {
-        this.username = CommonUtil.getEncrypt(username);
+        this.username = EncryptUtil.getEncrypt(username);
     }
 
     public void setPasswordWithEncrypt(String password) {
-        this.password = CommonUtil.getEncrypt(password);
+        this.password = EncryptUtil.getEncrypt(password);
     }
 
     public String getDecryptedUsername() {
-        return CommonUtil.getDecrypt(username);
+        return EncryptUtil.getDecrypt(username);
     }
 
     public String getDecryptedPassword() {
-        return CommonUtil.getDecrypt(password);
+        return EncryptUtil.getDecrypt(password);
     }
 }

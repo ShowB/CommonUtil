@@ -24,6 +24,7 @@ public class FileUtil {
      * @return List<File>
      * @throws Exception Exception
      */
+    @Deprecated
     public static List<File> findFiles(String source, String filePrefix, String fileExt) {
         return getTargetFilesHierarchy(source, filePrefix, fileExt, new ArrayList<>());
     }
@@ -37,6 +38,7 @@ public class FileUtil {
      * @return List<File>
      * @throws Exception Exception
      */
+    @Deprecated
     private static List<File> getTargetFilesHierarchy(String uri, String filePrefix, String fileExt, List<File> files) {
         try {
             File rootFoldor = new File(uri);
@@ -81,10 +83,12 @@ public class FileUtil {
      *
      * @param source source
      */
+    @Deprecated
     public static void makeDirectory(String source) {
         new File(source).mkdirs();
     }
 
+    @Deprecated
     public static void mergeFiles() {
         log.debug("**************** File Merge Start ...");
 

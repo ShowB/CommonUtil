@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EnvManager {
 
-    private static EnvManager instance = null;
-
     private final Environment env;
 
     private EnvManager() {
